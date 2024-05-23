@@ -1,9 +1,9 @@
-import React from "react";
+import React from 'react';
 
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes } from 'react-router-dom';
 
-import ApplicationFrame from "./pages/ApplicationFrame";
-import Home from "./pages/Home/Home";
+import ApplicationFrame from './pages/ApplicationFrame';
+import Home from './pages/Home/Home';
 
 export default function Router() {
   return (
