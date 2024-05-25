@@ -1,0 +1,129 @@
+import React, { useState } from 'react';
+
+import Modal from 'react-modal';
+import * as Yup from 'yup';
+import { Formik, FormikHelpers } from 'formik';
+
+interface NewEmployeeModalProps {
+  modalIsOpen: boolean;
+  setModalIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+type NewEmployee = {
+  name: string;
+  email: string;
+  dateStart: string;
+  position: string;
+};
+
+const initialValues: NewEmployee = {
+  name: '',
+  email: '',
+  dateStart: '',
+  position: '',
+};
+
+const ValidationSchema = Yup.object().shape({
+  name: Yup.string().required('Ime je obvezno.'),
+  email: Yup.string()
+    .required('Email je obvezan.')
+    .email('Email adresa nije valjana.'),
+  dateStart: Yup.string().required('Datum je obvezan.'),
+  position: Yup.string().required('Radna pozicija je obvezna.'),
+});
+
+export default function NewEmployeeModal({
+  modalIsOpen,
+  setModalIsOpen,
+}: NewEmployeeModalProps) {
+  const [serverError, setServerError] = useState<string>('');
+
+  const onSubmit = async (
+    values: NewEmployee,
+    formikHelpers: FormikHelpers<NewEmployee>
+  ) => {
+    console.log(values);
+    axios({
+      method: 'post',
+      url: 'http://localhost:8080/api/my-adverts',
+      data: data,
+    })
+      .then((res) => {
+        console.log(res);
+        formikHelpers.resetForm();
+        formikHelpers.setErrors({});
+      })
+      .catch((err) => console.log(err));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  };
+
+  return (
+    <Modal
+      isOpen={modalIsOpen}
+      onRequestClose={() => setModalIsOpen(false)}
+      className="bg-white rounded-xl shadow-lg py-10 px-16 max-w-md mx-auto mt-16"
+      overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+    >
+      <Formik
+        initialValues={initialValues}
+        validationSchema={ValidationSchema}
+        onSubmit={onSubmit}
+      >
+        <h2 className="text-2xl font-bold mb-4">Dodaj novog djelatnika</h2>
+        <form className="flex flex-col space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Ime i prezime
+            </label>
+            <input
+              type="text"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Tip nastavnika
+            </label>
+            <input
+              type="text"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Email adresa
+            </label>
+            <input
+              type="email"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Datum zaposlenja
+            </label>
+            <input
+              type="date"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            />
+          </div>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg mx-1"
+              onClick={() => setModalIsOpen(false)}
+            >
+              Odustani
+            </button>
+            <button
+              type="submit"
+              className="bg-gradient-to-tr hover:bg-gradient-to-tl from-[#8DFC00] to-[#EAFD06] text-[#03294D] font-bold py-2 px-4 rounded-lg"
+            >
+              Dodaj
+            </button>
+          </div>
+        </form>
+      </Formik>
+    </Modal>
+  );
+}
