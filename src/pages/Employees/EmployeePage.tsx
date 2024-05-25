@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import {
   faFloppyDisk,
   faTrashCan,
@@ -9,12 +10,14 @@ import {
   faCaretRight,
   faPenToSquare,
 } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 // Postavljanje modala na korijen aplikacije
-Modal.setAppElement('#root');
+// Modal.setAppElement('#root');
 
 const EmployeePage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { id } = useParams();
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -23,6 +26,27 @@ const EmployeePage: React.FC = () => {
   const closeModal = () => {
     setIsModalOpen(false);
   };
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/employee/getEmployee/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      setEmployees(response.data);
+      setFilteredEmployees(response.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData().then();
+  }, []);
 
   return (
     <div>

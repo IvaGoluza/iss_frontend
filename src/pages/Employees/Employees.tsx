@@ -15,10 +15,10 @@ export interface EmployeeType {
   id: number;
   name: string;
   email: string;
-  dateEnd: string;
+  dateEnd: string | null;
   dateStart: string;
   position: string;
-  aktivName: string;
+  aktivName: string | null;
 }
 
 export default function Employees() {
@@ -78,7 +78,7 @@ export default function Employees() {
 
   return (
     <div className="h-[92.5vh] md:px-16 px-8 grid grid-rows-1 pt-10 grid-cols-3 gap-6">
-      <div className="col-span-2 bg-white rounded-xl h-4/5 border border-[#6AA2F6]">
+      <div className="col-span-2 bg-white rounded-xl min-h-[70vh] h-fit pb-5 border border-[#6AA2F6]">
         <div className="text-white bg-[#647CF6] rounded-t-[0.6rem] px-7 py-3 text-sm font-bold grid grid-rows-1 grid-cols-2">
           <span>Ime i prezime</span>
           <span>Nastavnik</span>
@@ -151,6 +151,8 @@ export default function Employees() {
       <NewEmployeeModal
         modalIsOpen={modalIsOpen}
         setModalIsOpen={setModalIsOpen}
+        setFilteredEmployees={setFilteredEmployees}
+        setEmployees={setEmployees}
       />
     </div>
   );
