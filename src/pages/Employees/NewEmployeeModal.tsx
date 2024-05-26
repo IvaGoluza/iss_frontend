@@ -26,7 +26,7 @@ const initialValues: NewEmployee = {
   position: '',
 };
 
-const ValidationSchema = Yup.object().shape({
+export const ValidationSchema = Yup.object().shape({
   name: Yup.string().required('Ime je obvezno.'),
   email: Yup.string()
     .required('Email je obvezan.')
@@ -41,12 +41,12 @@ export default function NewEmployeeModal({
   setEmployees,
   setFilteredEmployees,
 }: NewEmployeeModalProps) {
-  const [serverError, setServerError] = useState<string>('');
   const [formData, setFormData] = useState<NewEmployee>(initialValues);
   const [formErrors, setFormErrors] = useState<Partial<NewEmployee>>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    if (name === 'dateStart') console.log(value);
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -60,28 +60,14 @@ export default function NewEmployeeModal({
         'http://localhost:8080/employee/create',
         formData
       );
-      console.log('Uspješno poslano:', response.data);
-      const newEmpl = {
-        id: response.data.id,
-        name: response.data.name,
-        email: response.data.email,
-        dateEnd: response.data.dateEnd,
-        dateStart: response.data.dateStart,
-        position: response.data.position,
-        aktivName: response.data.aktivName,
-      };
       setFilteredEmployees((prevEmployees) => [
         ...prevEmployees,
         response.data,
       ]);
-      console.log('hi', newEmpl);
       setEmployees((prevEmployees) => [...prevEmployees, response.data]);
-      console.log('hi');
       setFormData(initialValues);
-      console.log(formData);
       setFormErrors({});
       setModalIsOpen(false);
-      console.log(modalIsOpen);
     } catch (error) {
       console.log(error);
       if (error instanceof ValidationError) {
@@ -92,8 +78,6 @@ export default function NewEmployeeModal({
           }
         });
         setFormErrors(errors);
-      } else {
-        setServerError('Nešto je pošlo po zlu. Molimo pokušajte ponovo.');
       }
     }
   };

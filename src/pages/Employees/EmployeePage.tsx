@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { ValidationSchema } from './NewEmployeeModal';
+import { ValidationError } from 'yup';
+import { Link } from 'react-router-dom';
+
 import {
   faFloppyDisk,
   faTrashCan,
@@ -11,13 +15,115 @@ import {
   faPenToSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
+import { EmployeeType } from './Employees';
+import toast from 'react-hot-toast';
 
 // Postavljanje modala na korijen aplikacije
 // Modal.setAppElement('#root');
 
+function getEmployeeIdFromPath() {
+  const path = window.location.pathname;
+  const parts = path.split('/');
+  return parts[parts.length - 1];
+}
+
+type AktivType = {
+  idAktiv: number;
+  aktivName: string;
+};
+
+type employeeAktivType = {
+  employee: EmployeeType;
+  aktivList: AktivType[];
+};
+
+const initialValues: EmployeeType = {
+  id: 0,
+  name: '',
+  email: '',
+  dateStart: '',
+  position: '',
+  dateEnd: '',
+  aktivName: '',
+};
+
+function formatDateString(dateString: string | undefined | null): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 const EmployeePage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { id } = useParams();
+  const [employee, setEmployee] = useState<EmployeeType>(initialValues);
+  const [aktivList, setAktivList] = useState<AktivType[]>([]);
+  const [formErrors, setFormErrors] = useState<Partial<EmployeeType>>({});
+  const id = getEmployeeIdFromPath();
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setEmployee((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      await ValidationSchema.validate(employee, { abortEarly: false });
+
+      const employeeData = {
+        idUser: id,
+        name: employee.name,
+        email: employee.email,
+        position: employee.position,
+        idAktiv:
+          aktivList.find((item) => item.aktivName === employee.aktivName)
+            ?.idAktiv ?? null,
+        dateStart: employee.dateStart,
+        dateEnd: employee.dateEnd ? employee.dateEnd : null,
+      };
+
+      console.log('data');
+      console.log(employeeData);
+      const response = await axios.put(
+        'http://localhost:8080/employee/update',
+        employeeData
+      );
+
+      console.log('Podaci poslani:', response.data);
+      setFormErrors({});
+      toast.success('Izmjene informacija o djelatniku su spremljene.', {
+        position: 'bottom-center',
+        duration: 3000,
+        className: 'scale-125',
+      });
+    } catch (error) {
+      console.log(error);
+      if (error instanceof ValidationError) {
+        const errors = {};
+        error.inner.forEach((err) => {
+          errors[err.path] = err.message;
+        });
+        setFormErrors(errors);
+      }
+    }
+  };
+
+  const handleDeleteEmployee = async () => {
+    try {
+      await axios.delete(
+        `http://localhost:8080/employee/delete/${employee.id}`
+      );
+    } catch (error) {
+      console.error('Error deleting employee:', error);
+    }
+  };
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -37,8 +143,13 @@ const EmployeePage: React.FC = () => {
           },
         }
       );
-      setEmployees(response.data);
-      setFilteredEmployees(response.data);
+      const data: employeeAktivType = response.data;
+      setEmployee({
+        ...data.employee,
+        dateStart: formatDateString(data.employee.dateStart),
+        dateEnd: formatDateString(data.employee.dateEnd),
+      });
+      setAktivList(data.aktivList);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -60,14 +171,32 @@ const EmployeePage: React.FC = () => {
             <p className="font-bold text-[#003362] text-sm">
               Ime i prezime djelatnika
             </p>{' '}
-            <input className="w-[90%] bg-white text-slate-900 rounded-lg shadow-lg outline-none p-2" />
+            <input
+              type="text"
+              name="name"
+              value={employee?.name}
+              onChange={handleInputChange}
+              className="w-[90%] bg-white text-slate-900 rounded-lg shadow-lg outline-none p-2"
+            />
+            {formErrors.name && (
+              <p className="text-red-500">{formErrors.name}</p>
+            )}
           </div>
           <div className="my-1">
             {' '}
             <p className="font-bold text-[#003362] text-sm">
               Email adresa
             </p>{' '}
-            <input className="w-[90%] bg-white text-slate-900 rounded-lg shadow-lg outline-none p-2" />
+            <input
+              type="email"
+              name="email"
+              value={employee?.email}
+              onChange={handleInputChange}
+              className="w-[90%] bg-white text-slate-900 rounded-lg shadow-lg outline-none p-2"
+            />
+            {formErrors.email && (
+              <p className="text-red-500">{formErrors.email}</p>
+            )}
           </div>
           <div className="my-1">
             {' '}
@@ -75,16 +204,31 @@ const EmployeePage: React.FC = () => {
               Početak radnog odnosa
             </p>{' '}
             <input
+              type="date"
+              name="dateStart"
+              value={employee?.dateStart}
+              onChange={handleInputChange}
               className="w-[90%] bg-white text-slate-900 rounded-lg shadow-lg outline-none p-2"
-              type={'date'}
             />
+            {formErrors.dateStart && (
+              <p className="text-red-500">{formErrors.dateStart}</p>
+            )}
           </div>
           <div className="my-1">
             {' '}
             <p className="font-bold text-[#003362] text-sm">
               Tip nastavnika
             </p>{' '}
-            <input className="w-[90%] bg-white text-slate-900 rounded-lg shadow-lg outline-none p-2" />
+            <input
+              type="text"
+              name="position"
+              value={employee?.position}
+              onChange={handleInputChange}
+              className="w-[90%] bg-white text-slate-900 rounded-lg shadow-lg outline-none p-2"
+            />
+            {formErrors.position && (
+              <p className="text-red-500">{formErrors.position}</p>
+            )}
           </div>
           <div className="my-1">
             {' '}
@@ -92,25 +236,47 @@ const EmployeePage: React.FC = () => {
               Kraj radnog odnosa
             </p>{' '}
             <input
+              type="date"
+              name="dateEnd"
+              value={employee?.dateEnd ? employee?.dateEnd : ''}
+              onChange={handleInputChange}
               className="w-[90%] bg-white text-slate-900 rounded-lg shadow-lg outline-none p-2"
-              type={'date'}
             />
           </div>
           <div className="my-1">
             {' '}
             <p className="font-bold text-[#003362] text-sm">Aktiv</p>{' '}
-            <input className="w-[90%] bg-white text-slate-900 rounded-lg shadow-lg outline-none p-2" />
+            <select
+              name="aktivName"
+              value={employee?.aktivName ? employee.aktivName : ''}
+              onChange={handleInputChange}
+              className="w-[90%] bg-white text-slate-900 rounded-lg shadow-lg outline-none p-2"
+            >
+              <option value="">Odaberi aktiv</option>
+              {aktivList.map((aktiv) => (
+                <option key={aktiv.idAktiv} value={aktiv.aktivName}>
+                  {aktiv.aktivName}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         <div className="flex flex-row justify-end text-white font-bold text-sm mt-10 mr-10">
-          <button className="bg-gradient-to-tr hover:bg-gradient-to-tl  from-[#43C722] to-[#3DF310] rounded-lg px-5 py-2 mx-1 shadow-xl">
+          <button
+            onClick={handleSubmit}
+            className="bg-gradient-to-tr hover:bg-gradient-to-tl  from-[#43C722] to-[#3DF310] rounded-lg px-5 py-2 mx-1 shadow-xl"
+          >
             <FontAwesomeIcon icon={faFloppyDisk} className="mr-1" />
             Spremi
           </button>
-          <button className="px-5 bg-gradient-to-tr hover:bg-gradient-to-tl from-[#C72222] to-[#F60404] rounded-lg mx-1 shadow-xl">
+          <Link
+            to="/employees"
+            onClick={handleDeleteEmployee}
+            className="px-5 bg-gradient-to-tr hover:bg-gradient-to-tl from-[#C72222] to-[#F60404] rounded-lg mx-1 shadow-xl flex flex-row items-center"
+          >
             <FontAwesomeIcon icon={faTrashCan} className="mr-1" />
             Obriši
-          </button>
+          </Link>
         </div>
 
         <button className="absolute -left-16 top-[45%] bg-gradient-to-r hover:bg-gradient-to-tr from-cyan-500 to-blue-500 px-4 py-1 rounded-lg shadow-xl border">

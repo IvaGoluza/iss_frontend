@@ -7,6 +7,8 @@ import {
 import SearchList from '../../components/SearchList';
 import axios from 'axios';
 import NewEmployeeModal from './NewEmployeeModal';
+import { Link, Route, Routes } from 'react-router-dom';
+import EmployeePage from './EmployeePage';
 
 // Postavljanje modala na korijen aplikacije
 //Modal.setAppElement('#root');
@@ -85,19 +87,21 @@ export default function Employees() {
         </div>
         <div className="flex flex-col px-4">
           {filteredEmployees?.map((man) => (
-            <div className="grid grid-rows-1 grid-cols-2 bg-gradient-to-r from-[#DCDFF0] to-white px-3 py-2 font-semibold mt-1.5 rounded-xl">
-              <span>{man.name}</span>
-              <span className="relative">
-                <div
-                  className={`absolute -left-5 top-1 h-4 w-4 rounded-full bg-gradient-to-tr ${
-                    man.position.includes('predmetna')
-                      ? 'from-[#9F04E8] to-[#DB06FD]'
-                      : 'from-[#FC3EB2] to-[#FFADA8]'
-                  } mr-2`}
-                ></div>
-                {man.position}
-              </span>
-            </div>
+            <Link to={`/employees/${man.id}`} key={man.id}>
+              <div className="grid grid-rows-1 grid-cols-2 bg-gradient-to-r from-[#DCDFF0] to-white px-3 py-2 font-semibold mt-1.5 rounded-xl">
+                <span>{man.name}</span>
+                <span className="relative">
+                  <div
+                    className={`absolute -left-5 top-1 h-4 w-4 rounded-full bg-gradient-to-tr ${
+                      man.position.includes('predmetna')
+                        ? 'from-[#9F04E8] to-[#DB06FD]'
+                        : 'from-[#FC3EB2] to-[#FFADA8]'
+                    } mr-2`}
+                  ></div>
+                  {man.position}
+                </span>
+              </div>
+            </Link>
           ))}
         </div>
       </div>

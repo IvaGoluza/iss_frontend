@@ -11,7 +11,7 @@ export default function Router() {
     <Routes>
       <Route path="/" element={<ApplicationFrame />}>
         <Route path="/employees" element={<Employees />} />
-        <Route path="/worker" element={<EmployeePage />} />
+        <Route path="/employees/:id" element={<EmployeePage />} />
       </Route>
       <Route path="*" element={<div className="h1">Page not found</div>} />
     </Routes>
