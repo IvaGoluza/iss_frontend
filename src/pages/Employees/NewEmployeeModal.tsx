@@ -46,7 +46,6 @@ export default function NewEmployeeModal({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (name === 'dateStart') console.log(value);
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,

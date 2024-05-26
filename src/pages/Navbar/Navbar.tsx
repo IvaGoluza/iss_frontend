@@ -43,34 +43,6 @@ export default function Navbar() {
           AKTIVI
         </p>
       </Link>
-      <Link
-        key={nanoid()}
-        to={routes.SJEDNICE}
-        onClick={() => setActive(routes.SJEDNICE)}
-      >
-        {' '}
-        <p
-          className={
-            active === routes.SJEDNICE ? 'text-[#8DFC00]' : 'text-white'
-          }
-        >
-          SJEDNICE
-        </p>
-      </Link>
-      <Link
-        key={nanoid()}
-        to={routes.NASTAVNE_GODINE}
-        onClick={() => setActive(routes.NASTAVNE_GODINE)}
-      >
-        {' '}
-        <p
-          className={
-            active === routes.NASTAVNE_GODINE ? 'text-[#8DFC00]' : 'text-white'
-          }
-        >
-          NASTAVNE GODINE
-        </p>
-      </Link>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Modal from 'react-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faMagnifyingGlass,
@@ -7,11 +8,10 @@ import {
 import SearchList from '../../components/SearchList';
 import axios from 'axios';
 import NewEmployeeModal from './NewEmployeeModal';
-import { Link, Route, Routes } from 'react-router-dom';
-import EmployeePage from './EmployeePage';
+import { Link } from 'react-router-dom';
 
 // Postavljanje modala na korijen aplikacije
-//Modal.setAppElement('#root');
+Modal.setAppElement('#root');
 
 export interface EmployeeType {
   id: number;

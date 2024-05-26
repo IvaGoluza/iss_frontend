@@ -1,6 +1,6 @@
 export const routes = {
-  DJELATNICI: '/djelatnici',
-  AKTIVI: '/aktivi',
+  DJELATNICI: '/employees',
+  AKTIVI: '/actives',
   SJEDNICE: '/sjednice',
   NASTAVNE_GODINE: '/nastavne-godine',
 };
